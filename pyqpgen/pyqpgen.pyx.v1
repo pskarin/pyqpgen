@@ -1,0 +1,10 @@
+cimport pyqpgen as qpgen
+
+cdef class QP:
+
+	def __cinit__(self):
+		pass
+		
+	def __dealloc__(self):
+		pass
+		

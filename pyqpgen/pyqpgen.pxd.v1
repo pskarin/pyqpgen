@@ -1,0 +1,2 @@
+cdef extern from "../qp_files/QPgen.h":
+	void qp(double *x_out, int *iter, double *gt, double *bt)
