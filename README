@@ -1,0 +1,32 @@
+About
+--------------------------------------------------------------------------------
+The software in this respository generates python bindings to optimization code
+generated through the QPgen Matlab library for convex optimizations.
+
+Installation
+--------------------------------------------------------------------------------
+Required software:
+	Matlab
+	QPgen
+	GNU make
+	
+Install Matlab. Version R2016a is the only verified version. Get QPgen from
+http://www.control.lth.se/QPgen/installation.html and follow the installation
+instructions. Install make through your preferred package manager.
+
+Usage
+--------------------------------------------------------------------------------
+Provide the QPgen description in the file user.m then execute 'make'. This
+generates the C code in qp_files/.
+
+Contents
+--------------------------------------------------------------------------------
+qpgen/
+	This folder contains the QPgen software. It is included in the git since
+	it is small and QPgen is otherwise distributed as an archive.
+user.m
+	The system specification file for the user to edit.
+pyqpgen/
+	The scripts, code, configurations etc that make the bulk of what PyQPgen is.
+README
+	This file.
