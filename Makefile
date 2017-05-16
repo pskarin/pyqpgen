@@ -1,9 +1,11 @@
-CONFIG=config.mk
+include .config
+CONFIG?=example.mk
+$(shell echo CONFIG=$(CONFIG) > .config)
 include $(CONFIG)
 
 WS=.ws-$(LIBNAME)
 
-.PHONY : default qpgen
+.PHONY : default qpgen inform
 
 CFLAGS=-I$(WS)/qp_files -I$(WS) -fPIC
 CFLAGS += $(shell pkg-config --cflags python)
@@ -12,7 +14,10 @@ OUTPUT=$(LIBNAME).so
 
 $(shell mkdir -p $(WS))
 
-default: qplib
+default: inform qplib
+
+inform:
+	@echo '>>>> Using config $(CONFIG) <<<<<'
 
 # These are the files genrated in step 1 when pyqpgen/generate.m is run.
 QPGENFILES=$(WS)/qp_files/ $(WS)/pyqpgen-constants.h $(WS)/qp_mex.mexa64 $(WS)/user.m
@@ -29,7 +34,7 @@ $(WS)/qp_files/QPgen.c: $(MFILE) pyqpgen/generate.m
 # also means that they are not available in the first run and therefore there
 # is an indirection through the qplib rule in which the makefile calls itself.
 QPSOURCE=$(filter-out %/alg_data.c %/qp_mex.c,\
-	$(shell find $(WS)/qp_files -iname '*.c' 2>/dev/null))
+$(shell find $(WS)/qp_files -iname '*.c' 2>/dev/null))
 QPOBJ=$(QPSOURCE:.c=.o)
 
 qplib: $(WS)/qp_files/QPgen.c

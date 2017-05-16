@@ -16,17 +16,24 @@ instructions. Install make through your preferred package manager.
 
 Usage
 --------------------------------------------------------------------------------
-Provide the QPgen description in the file user.m then execute 'make'. This
-generates the C code in qp_files/.
+Look at example.mk, example.m and example.py. Modify them or create a new .mk
+where you input a m-file and a library name. Create the m-file which specifies
+the system for QPgen. Then execute make as 'make CONFIG=your.mk'. Repeated make
+will read from a file (.config) where it stores the CONFIG variable and hence
+you do not need to specify CONFIG again unless you want to change config.
 
 Contents
 --------------------------------------------------------------------------------
 qpgen/
 	This folder contains the QPgen software. It is included in the git since
 	it is small and QPgen is otherwise distributed as an archive.
-user.m
-	The system specification file for the user to edit.
 pyqpgen/
 	The scripts, code, configurations etc that make the bulk of what PyQPgen is.
+example.mk
+  Config file for the example
+example.m
+	Definition file for an aircraft example
+example.py
+  Example simulation
 README
 	This file.

@@ -2,53 +2,55 @@ cimport pyqpgen as qpgen
 
 cdef class QP:
 	cdef qpgen.PyQPgenData * data
-	cdef double * inputs
-	cdef double * states
-	cdef double * outputs
+	cdef double * target
+	cdef double * x0
+	cdef double * result
+	cdef int * num_iterations
+	cdef int statessize
+	cdef int inputssize
+	cdef int datasize
 	
 	def __cinit__(self):
-		self.data = qpgen.PyQPgenAllocate()
-		self.inputs = PyQPgen_getInputs(self.data)
-		self.states = PyQPgen_getStates(self.data)
-		self.outputs = PyQPgen_getOutputs(self.data)
+		self.data = qpgen.allocate()
+				
+		self.target = qpgen.target(self.data)
+		self.x0 = qpgen.x0(self.data)
+		self.num_iterations = qpgen.num_iterations(self.data)
+		self.result = qpgen.result(self.data)
 		
+		self.statessize =  qpgen.NUM_STATES*qpgen.HORIZON
+		self.inputssize =  qpgen.NUM_INPUTS*qpgen.HORIZON
+		self.datasize = self.statessize+self.inputssize
+
 	def __dealloc__(self):
-		qpgen.PyQPgenDeallocate(&self.data)
+		qpgen.deallocate(&self.data)
 
-	def setInputs(self, values):
-		if len(values) != qpgen.PYQPGEN_NUM_INPUTS:
-			raise IndexError("Size of input array does not match number of inputs")
-
-		for idx in range(0,qpgen.PYQPGEN_NUM_INPUTS):
-			self.inputs[idx] = values[idx]
-
-	def getInputs(self):
-		return [self.inputs[idx] for idx in range(0,qpgen.PYQPGEN_NUM_INPUTS)]
-
-	def setStates(self, values):
-		if len(values) != qpgen.PYQPGEN_NUM_STATES:
+	def setState(self, values):		
+		if len(values) != qpgen.NUM_STATES:
 			raise IndexError("Size of input array does not match number of states")
+		for idx in range(0,qpgen.NUM_STATES):
+			self.x0[idx] = values[idx]
 
-		for idx in range(0,qpgen.PYQPGEN_NUM_STATES):
-			self.states[idx] = values[idx]
+	def setTargetInputs(self, values):
+		if len(values) != self.inputssize:
+			raise IndexError("Size of input array does not match number of inputs")
+		j = self.statessize
+		for i in range(0,self.inputssize):
+			self.target[j] = values[i]
+			j += 1
 
-	def getStates(self):
-		return [self.states[idx] for idx in range(0,qpgen.PYQPGEN_NUM_STATES)]
+	def setTargetStates(self, values):
+		if len(values) != self.statessize:
+			raise IndexError("Size of input array does not match number of states")
+		for i in range(0,self.statessize):
+			self.target[i] = values[i]
 
-
-	def setOutputs(self, values):
-		if len(values) != qpgen.PYQPGEN_NUM_OUTPUTS:
-			raise IndexError("Size of input array does not match number of outputs")
-
-		for idx in range(0,qpgen.PYQPGEN_NUM_OUTPUTS):
-			self.outputs[idx] = values[idx]
-
-	def getOutputs(self):
-		return [self.outputs[idx] for idx in range(0,qpgen.PYQPGEN_NUM_OUTPUTS)]
-
+	def getControl(self):
+		return [self.result[i] for i in range(self.statessize, self.statessize+qpgen.NUM_INPUTS)]
+	
+	def getNumberOfIterations(self):
+		return self.num_iterations[0]
 
 	def run(self):
-		print(qpgen.PYQPGEN_NUM_STATES)
-		print(qpgen.PYQPGEN_NUM_OUTPUTS)
-		print(qpgen.PYQPGEN_NUM_INPUTS)
-		pass
+		qpgen.qp(self.result, self.num_iterations, self.target, self.x0)
+		return self.getControl()

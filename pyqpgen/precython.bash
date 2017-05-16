@@ -14,35 +14,36 @@ if [ ${MODE} == "pxd" ]; then
 	cat > ${WS}/pyqpgen-data.h <<__END
 #include "pyqpgen-constants.h"
 typedef struct __PyQPgenData {
-	double * states;
-	double * inputs;
-	double * outputs;
-	double data[PYQPGEN_NUM_STATES + PYQPGEN_NUM_INPUTS + PYQPGEN_NUM_OUTPUTS];
+	double target[(NUM_STATES + NUM_INPUTS) * HORIZON];
+	double x0[NUM_STATES];
+	double result[(NUM_STATES + NUM_INPUTS) * HORIZON];
+	int num_iterations;
 } PyQPgenData;
-PyQPgenData * PyQPgenAllocate();
-void PyQPgenDeallocate(PyQPgenData ** o);
-double * PyQPgen_getInputs(PyQPgenData * o);
-double * PyQPgen_getOutputs(PyQPgenData * o);
-double * PyQPgen_getStates(PyQPgenData * o);
+
+PyQPgenData * allocate();
+void deallocate(PyQPgenData ** o);
+
+double * target(PyQPgenData * o);
+double * x0(PyQPgenData * o);
+int * num_iterations(PyQPgenData * o);
+double * result(PyQPgenData * o);
 __END
 	cat > ${WS}/pyqpgen-data.c <<__END
 #include "pyqpgen-data.h"
 #include <stdlib.h>
-PyQPgenData * PyQPgenAllocate() {
-	PyQPgenData * o = (PyQPgenData *) calloc(1, sizeof(PyQPgenData));
-	o->states = &o->data[0];
-	o->inputs = &o->data[PYQPGEN_NUM_STATES];
-	o->outputs = &o->data[PYQPGEN_NUM_STATES+PYQPGEN_NUM_INPUTS];
-	return o;
+
+PyQPgenData * allocate() {
+	return (PyQPgenData *) calloc(1, sizeof(PyQPgenData));
 }
-void PyQPgenDeallocate(PyQPgenData ** o) {
+void deallocate(PyQPgenData ** o) {
 	free(*o);
 	*o = NULL;
 }
-double * PyQPgen_getInputs(PyQPgenData * o) { return o->inputs; }
-double * PyQPgen_getOutputs(PyQPgenData * o) { return o->outputs; }
-double * PyQPgen_getStates(PyQPgenData * o) { return o->states; }
 
+double * target(PyQPgenData * o) { return &o->target[0]; }
+double * x0(PyQPgenData * o) { return &o->x0[0]; }
+int * num_iterations(PyQPgenData * o) { return &o->num_iterations; }
+double * result(PyQPgenData * o) { return &o->result[0];; }
 __END
 	cp pyqpgen/pyqpgen.pxd.v${VERSION} ${WS}/${LIBNAME}.pxd
 else
