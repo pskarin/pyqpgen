@@ -1,2 +1,11 @@
 cdef extern from "../qp_files/QPgen.h":
+
 	void qp(double *x_out, int *iter, double *gt, double *bt)
+
+cdef extern from "../.ws/pyqpgen-constants.h":
+
+	cdef int PYQPGEN_NUM_OUTPUTS
+	cdef int PYQPGEN_NUM_INPUTS
+	cdef int PYQPGEN_NUM_STATES
+	cdef int PYQPGEN_HORIZON
+	

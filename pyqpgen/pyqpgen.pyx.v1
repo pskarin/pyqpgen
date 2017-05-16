@@ -1,10 +1,13 @@
 cimport pyqpgen as qpgen
 
 cdef class QP:
-
 	def __cinit__(self):
 		pass
 		
 	def __dealloc__(self):
 		pass
-		
+
+	def run(self):
+		print(qpgen.NUM_OUTPUTS)
+		print(qpgen.NUM_INPUTS)
+		pass
