@@ -1,11 +1,20 @@
-cdef extern from "../qp_files/QPgen.h":
+cdef extern from "QPgen.h":
 
 	void qp(double *x_out, int *iter, double *gt, double *bt)
 
-cdef extern from "../.ws/pyqpgen-constants.h":
+cdef extern from "pyqpgen-constants.h":
 
 	cdef int PYQPGEN_NUM_OUTPUTS
 	cdef int PYQPGEN_NUM_INPUTS
 	cdef int PYQPGEN_NUM_STATES
 	cdef int PYQPGEN_HORIZON
-	
+
+cdef extern from "pyqpgen-data.h":
+	ctypedef struct PyQPgenData:
+		pass
+
+	PyQPgenData * PyQPgenAllocate()
+	void PyQPgenDeallocate(PyQPgenData ** o)
+	double * PyQPgen_getInputs(PyQPgenData * o)
+	double * PyQPgen_getStates(PyQPgenData * o)
+	double * PyQPgen_getOutputs(PyQPgenData * o)

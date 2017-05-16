@@ -1,13 +1,54 @@
 cimport pyqpgen as qpgen
 
 cdef class QP:
+	cdef qpgen.PyQPgenData * data
+	cdef double * inputs
+	cdef double * states
+	cdef double * outputs
+	
 	def __cinit__(self):
-		pass
+		self.data = qpgen.PyQPgenAllocate()
+		self.inputs = PyQPgen_getInputs(self.data)
+		self.states = PyQPgen_getStates(self.data)
+		self.outputs = PyQPgen_getOutputs(self.data)
 		
 	def __dealloc__(self):
-		pass
+		qpgen.PyQPgenDeallocate(&self.data)
+
+	def setInputs(self, values):
+		if len(values) != qpgen.PYQPGEN_NUM_INPUTS:
+			raise IndexError("Size of input array does not match number of inputs")
+
+		for idx in range(0,qpgen.PYQPGEN_NUM_INPUTS):
+			self.inputs[idx] = values[idx]
+
+	def getInputs(self):
+		return [self.inputs[idx] for idx in range(0,qpgen.PYQPGEN_NUM_INPUTS)]
+
+	def setStates(self, values):
+		if len(values) != qpgen.PYQPGEN_NUM_STATES:
+			raise IndexError("Size of input array does not match number of states")
+
+		for idx in range(0,qpgen.PYQPGEN_NUM_STATES):
+			self.states[idx] = values[idx]
+
+	def getStates(self):
+		return [self.states[idx] for idx in range(0,qpgen.PYQPGEN_NUM_STATES)]
+
+
+	def setOutputs(self, values):
+		if len(values) != qpgen.PYQPGEN_NUM_OUTPUTS:
+			raise IndexError("Size of input array does not match number of outputs")
+
+		for idx in range(0,qpgen.PYQPGEN_NUM_OUTPUTS):
+			self.outputs[idx] = values[idx]
+
+	def getOutputs(self):
+		return [self.outputs[idx] for idx in range(0,qpgen.PYQPGEN_NUM_OUTPUTS)]
+
 
 	def run(self):
-		print(qpgen.NUM_OUTPUTS)
-		print(qpgen.NUM_INPUTS)
+		print(qpgen.PYQPGEN_NUM_STATES)
+		print(qpgen.PYQPGEN_NUM_OUTPUTS)
+		print(qpgen.PYQPGEN_NUM_INPUTS)
 		pass
