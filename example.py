@@ -8,16 +8,6 @@ import time
 import numpy as np
 import matplotlib.pyplot as plt
 
-A = np.array([0.9993, -3.0083, -0.1131, -1.6081,
-             -0.0000,  0.9862,  0.0478,  0.0000,
-              0.0000,  2.0833,  1.0089, -0.0000,
-              0.0000,  0.0526,  0.0498,  1.0000]).reshape((4,4))
-
-B = np.array([-0.0804, -0.6347,
-              -0.0291, -0.0143,
-              -0.8679, -0.0917,
-			  -0.0216, -0.0022]).reshape((4, 2))
-
 qp = example.QP()
 qp.setTargetStates(np.tile([0,-1000,0,-1000], 10))
 qp.setTargetInputs(np.zeros(20))
@@ -37,11 +27,12 @@ for i in range(0, 100):
 	t1 = time.time()
 	u0 = qp.run()
 	t2 = time.time()
+	
+	x0 = qp.sim()
+	qp.setState(x0)
+
 	maxtime = max(maxtime, t2-t1)
 	sumtime += t2-t1
-	x0 = A.dot(x0)+B.dot(u0)
-	
-	qp.setState(x0)
 	sumitr += qp.getNumberOfIterations()
 	maxitr = max(maxitr, qp.getNumberOfIterations())
 	U[:,i] = u0

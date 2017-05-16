@@ -5,6 +5,7 @@ cdef class QP:
 	cdef double * target
 	cdef double * x0
 	cdef double * result
+	cdef double * x1
 	cdef int * num_iterations
 	cdef int statessize
 	cdef int inputssize
@@ -17,6 +18,7 @@ cdef class QP:
 		self.x0 = qpgen.x0(self.data)
 		self.num_iterations = qpgen.num_iterations(self.data)
 		self.result = qpgen.result(self.data)
+		self.x1 = qpgen.x1(self.data)
 		
 		self.statessize =  qpgen.NUM_STATES*qpgen.HORIZON
 		self.inputssize =  qpgen.NUM_INPUTS*qpgen.HORIZON
@@ -50,7 +52,14 @@ cdef class QP:
 	
 	def getNumberOfIterations(self):
 		return self.num_iterations[0]
+		
+	def getX1(self):
+		return [self.x1[i] for i in range(0, qpgen.NUM_STATES)]
 
 	def run(self):
 		qpgen.qp(self.result, self.num_iterations, self.target, self.x0)
 		return self.getControl()
+	
+	def sim(self):
+		qpgen.sim(self.data)
+		return self.getX1()

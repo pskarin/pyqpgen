@@ -17,3 +17,6 @@ cdef extern from "pyqpgen-data.h":
 	double * x0(PyQPgenData * o)
 	int * num_iterations(PyQPgenData * o)
 	double * result(PyQPgenData * o)
+	double * x1(PyQPgenData * o)
+
+	void sim(PyQPgenData * o)
