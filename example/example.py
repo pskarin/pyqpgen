@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import sys
-sys.path.append("qpexample-out")
+sys.path.append("out")
 from qpexample import QP
 
 import time
