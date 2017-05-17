@@ -10,9 +10,10 @@ WS=.ws-$(LIBNAME)
 CFLAGS=-I$(WS)/qp_files -I$(WS) -fPIC
 CFLAGS += $(shell pkg-config --cflags python)
 
-OUTPUT=$(LIBNAME).so
+OUTDIR=$(LIBNAME)-out
+OUTPUT=$(OUTDIR)/$(LIBNAME).so
 
-$(shell mkdir -p $(WS))
+$(shell mkdir -p $(WS) $(OUTDIR))
 
 default: inform qplib
 
@@ -28,6 +29,8 @@ QPGENFILES=$(WS)/qp_files/ $(WS)/pyqpgen-constants.h $(WS)/qp_mex.mexa64 $(WS)/u
 $(WS)/qp_files/QPgen.c: $(MFILE) pyqpgen/generate.m
 	cp $(MFILE) $(WS)/user.m
 	cd $(WS) && SYSFILE=$(MFILE) matlab -nodisplay -nojvm -nodesktop -nosplash -r "addpath ../pyqpgen;generate"
+	mkdir -p $(OUTDIR)/qp_files
+	cp -r $(WS)/qp_files/qp_data $(OUTDIR)/qp_files/
 
 # This part reads the source files genrated by QPgen. Depending on the system
 # specification they may differ which is why they are dynamically fetched. This

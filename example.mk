@@ -1,2 +1,2 @@
-LIBNAME=example
+LIBNAME=qpexample
 MFILE=example.m

@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 
 import sys
-sys.path.append(".")
-import example
+sys.path.append("qpexample-out")
+from qpexample import QP
 
 import time
 import numpy as np
 import matplotlib.pyplot as plt
 
-qp = example.QP()
+qp = QP()
 qp.setTargetStates(np.tile([0,-1000,0,-1000], 10))
 qp.setTargetInputs(np.zeros(20))
 x0 = np.zeros(4)
