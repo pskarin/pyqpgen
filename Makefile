@@ -37,6 +37,7 @@ QPGENFILES=$(WS)/qp_files/ $(WS)/pyqpgen-constants.h $(WS)/qp_mex.mexa64 $(WS)/u
 # system specification. This is done throught the pyqpgen/generate.m matlab
 # script which also creates a header file with constants.
 $(WS)/qp_files/QPgen.c: $(MFILE) pyqpgen/generate.m
+	$(MAKE) cleannotqpgen
 	cp $(MFILE) $(WS)/user.m
 	cd $(WS) && SYSFILE=$(MFILE) matlab -nodisplay -nojvm -nodesktop -nosplash -r "addpath ../pyqpgen;generate"
 	mkdir -p $(OUTDIR)/qp_files
@@ -81,7 +82,7 @@ $(PYXOUT): $(PYXTEMPLATE) pyqpgen/precython.bash
 $(CYTHONOUT): $(PXDOUT) $(PYXOUT)
 	cython -o $(CYTHONOUT) $(PYXOUT)
 
-.PHONY : clean cleanqpgen cleancc cleancython cleanlib
+.PHONY : clean cleanqpgen cleancc cleancython cleanlib cleannotqpgen
 
 # Clean the artifacts from pyqpgen/generate.m
 cleanqpgen:
@@ -104,6 +105,8 @@ cleancython:
 # Remove the final library
 cleanlib:
 	@rm -f $(OUTPUT)
+
+cleannotqpgen: cleanlib cleancython cleancc
 
 # Clean everything
 clean: cleanqpgen cleancc cleancython cleanlib

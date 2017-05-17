@@ -32,6 +32,7 @@ typedef struct __PyQPgenData {
 	double result[(NUM_STATES + NUM_INPUTS) * HORIZON];
 	int num_iterations;
 	double x1[NUM_STATES];
+	double u[NUM_INPUTS];
 	${DATAMEMBER}
 } PyQPgenData;
 
@@ -43,6 +44,7 @@ double * x0(PyQPgenData * o);
 int * num_iterations(PyQPgenData * o);
 double * result(PyQPgenData * o);
 double * x1(PyQPgenData * o);
+double * u(PyQPgenData * o);
 
 void sim(PyQPgenData * o);
 
@@ -69,6 +71,7 @@ double * x0(PyQPgenData * o) { return &o->x0[0]; }
 int * num_iterations(PyQPgenData * o) { return &o->num_iterations; }
 double * result(PyQPgenData * o) { return &o->result[0]; }
 double * x1(PyQPgenData * o) { return &o->x1[0]; }
+double * u(PyQPgenData * o) { return &o->u[0]; }
 
 void run(PyQPgenData * o) {
 ${RUNIMP}
@@ -81,14 +84,14 @@ void sim(PyQPgenData * o) {
 	int i,j,xa,xb;
 	double * x0 = &o->x0[0];
 	double * x1 = &o->x1[0];
-	double * u0 = &o->result[NUM_STATES*HORIZON];
+	double * u = &o->u[0];
 	for (i = 0, xa = 0, xb = 0; i < NUM_STATES; i++) {
 		double v = 0;
 		for (j = 0; j < NUM_STATES; j++, xa++) {
 			v += matA[xa]*x0[j];
 		}
 		for (j = 0; j < NUM_INPUTS; j++, xb++) {
-			v += matB[xb]*u0[j];
+			v += matB[xb]*u[j];
 		}
 		x1[i] = v;
 	}

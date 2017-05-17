@@ -28,7 +28,7 @@ for i in range(0, 100):
 	u0 = qp.run()
 	t2 = time.time()
 	
-	x0 = qp.sim()
+	x0 = qp.sim(u0)
 	qp.setState(x0)
 
 	maxtime = max(maxtime, t2-t1)

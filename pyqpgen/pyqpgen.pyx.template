@@ -6,6 +6,7 @@ cdef class QP:
 	cdef double * x0
 	cdef double * result
 	cdef double * x1
+	cdef double * u
 	cdef int * num_iterations
 	cdef int statessize
 	cdef int inputssize
@@ -19,6 +20,7 @@ cdef class QP:
 		self.num_iterations = qpgen.num_iterations(self.data)
 		self.result = qpgen.result(self.data)
 		self.x1 = qpgen.x1(self.data)
+		self.u = qpgen.u(self.data)
 		
 		self.statessize =  qpgen.NUM_STATES*qpgen.HORIZON
 		self.inputssize =  qpgen.NUM_INPUTS*qpgen.HORIZON
@@ -69,6 +71,10 @@ cdef class QP:
 		qpgen.run(self.data)
 		return self.getControl()
 	
-	def sim(self):
+	def sim(self, u):
+		if len(u) != qpgen.NUM_INPUTS:
+			raise IndexError("Size of input array ({}) does not match number of inputs ({})".format(len(u), qpgen.NUM_INPUTS))
+		for i in range(0,qpgen.NUM_INPUTS):
+			self.u[i] = u[i]
 		qpgen.sim(self.data)
 		return self.getX1()
