@@ -26,16 +26,25 @@ cdef class QP:
 
 	def __dealloc__(self):
 		qpgen.deallocate(&self.data)
+		
+	def horizon(self):
+		return qpgen.HORIZON
+
+	def numStates(self):
+		return qpgen.NUM_STATES
+
+	def numInputs(self):
+		return qpgen.NUM_INPUTS
 
 	def setState(self, values):		
 		if len(values) != qpgen.NUM_STATES:
-			raise IndexError("Size of input array does not match number of states")
+			raise IndexError("Size of input array ({}) does not match number of states ({})".format(len(values), qpgen.NUM_STATES))
 		for idx in range(0,qpgen.NUM_STATES):
 			self.x0[idx] = values[idx]
 
 	def setTargetInputs(self, values):
 		if len(values) != self.inputssize:
-			raise IndexError("Size of input array does not match number of inputs")
+			raise IndexError("Size of input array does ({}) not match number of inputs ({}x{}={})".format(len(values), qpgen.NUM_INPUTS, qpgen.HORIZON, self.inputssize))
 		j = self.statessize
 		for i in range(0,self.inputssize):
 			self.target[j] = values[i]
@@ -43,7 +52,7 @@ cdef class QP:
 
 	def setTargetStates(self, values):
 		if len(values) != self.statessize:
-			raise IndexError("Size of input array does not match number of states")
+			raise IndexError("Size of input array ({}) does not match number of states ({}x{}={})".format(len(values), qpgen.NUM_STATES, qpgen.HORIZON, self.statessize))
 		for i in range(0,self.statessize):
 			self.target[i] = values[i]
 

@@ -7,15 +7,18 @@ MODE=$3;
 if [ -e ${WS}/qp_files/data_struct.h ];
 then
 	QPFUNC="extern void qp(struct DATA * d, double *x_out, int *iter, double *gt, double *bt);";
-	DATAMEMBER="struct DATA data;";
 	HINCLUDE="#include \"data_struct.h\"";
 	CINCLUDE="extern void init_data(struct DATA *d); extern void free_data(struct DATA *d);";
-	RUNIMP="  init_data(&o->data); qp(&o->data, o->result, &o->num_iterations, o->target, o->x0); free_data(&o->data);";
+	# Unfortunatelly, QPgen frees the input pointer in free_data although init_data does not allocate it. Therefore we
+	# must allocate a new data struct all the time. We keep the pointer with the PyQPgenData struct anyway and hope to either
+	# fix the free in QPgen, write a custom free or find that the data is constant and can be allocated once.
+	DATAMEMBER="struct DATA * data;";
+	RUNIMP="  o->data = malloc(sizeof(struct DATA)); init_data(o->data); qp(o->data, o->result, &o->num_iterations, o->target, o->x0); free_data(o->data);";
 else
 	QPFUNC="extern void qp(double *x_out, int *iter, double *gt, double *bt);";
-	DATAMEMBER="";
 	HINCLUDE="";
 	CINCLUDE="";
+	DATAMEMBER="";
 	RUNIMP="  qp(o->result, &o->num_iterations, o->target, o->x0);";
 fi;
 
