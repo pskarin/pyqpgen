@@ -16,13 +16,15 @@ CFLAGS += $(shell pkg-config --cflags python)
 
 ifeq ($(strip $(CONFIGDIR)),.)
 OUTDIR=$(LIBNAME)-out
-OUTPUT=$(OUTDIR)/$(LIBNAME).so
+LIBDIR=$(OUTDIR)
+OUTPUT=$(LIBDIR)/$(LIBNAME).so
 else
-OUTDIR=$(CONFIGDIR)/out
-OUTPUT=$(OUTDIR)/$(LIBNAME).so
+OUTDIR=$(CONFIGDIR)
+LIBDIR=$(CONFIGDIR)/lib
+OUTPUT=$(LIBDIR)/$(LIBNAME).so
 endif
 
-$(shell mkdir -p $(WS) $(OUTDIR))
+$(shell mkdir -p $(WS) $(OUTDIR) $(LIBDIR))
 
 default: inform qplib
 

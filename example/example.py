@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import sys
-sys.path.append("out")
+sys.path.append("lib")
 from qpexample import QP
 
 import time
