@@ -3,6 +3,10 @@ CONFIG?=example.mk
 $(shell echo CONFIG=$(CONFIG) > .config)
 include $(CONFIG)
 
+CONFIGDIR=$(shell dirname $(CONFIG))
+
+MFILE:=$(CONFIGDIR)/$(MFILE)
+
 WS=.ws-$(LIBNAME)
 
 .PHONY : default qpgen inform
@@ -10,15 +14,21 @@ WS=.ws-$(LIBNAME)
 CFLAGS=-I$(WS)/qp_files -I$(WS) -fPIC
 CFLAGS += $(shell pkg-config --cflags python)
 
+ifeq ($(strip $(CONFIGDIR)),.)
 OUTDIR=$(LIBNAME)-out
 OUTPUT=$(OUTDIR)/$(LIBNAME).so
+else
+OUTDIR=$(CONFIGDIR)/out
+OUTPUT=$(OUTDIR)/$(LIBNAME).so
+endif
 
 $(shell mkdir -p $(WS) $(OUTDIR))
 
 default: inform qplib
 
 inform:
-	@echo '>>>> Using config $(CONFIG) <<<<<'
+	@echo '>>>>> Using config $(CONFIG) <<<<<'
+	@echo '>>>>> Output goes into $(CONFIGDIR)/ <<<<<'
 
 # These are the files genrated in step 1 when pyqpgen/generate.m is run.
 QPGENFILES=$(WS)/qp_files/ $(WS)/pyqpgen-constants.h $(WS)/qp_mex.mexa64 $(WS)/user.m
