@@ -76,7 +76,7 @@ cleanqpgen:
 
 # Clean the artifacts from gcc compilation
 cleancc:
-ifdef $(QPOBJ)
+ifneq ($(strip $(QPOBJ)),)
 	rm -f $(QPOBJ)
 endif
 	rm -f $(WS)/$(LIBNAME).o
