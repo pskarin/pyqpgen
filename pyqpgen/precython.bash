@@ -5,7 +5,7 @@ LIBNAME=$2;
 MODE=$3
 VERSION=1;
 
-if [ -e qp_files/data_struct.h ];
+if [ -e ${WS}/qp_files/data_struct.h ];
 then
 	VERSION=2;
 fi;
