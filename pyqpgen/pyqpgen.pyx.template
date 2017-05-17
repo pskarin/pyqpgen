@@ -1,4 +1,4 @@
-cimport pyqpgen as qpgen
+cimport #LIBNAME as qpgen
 
 cdef class QP:
 	cdef qpgen.PyQPgenData * data
@@ -57,7 +57,7 @@ cdef class QP:
 		return [self.x1[i] for i in range(0, qpgen.NUM_STATES)]
 
 	def run(self):
-		qpgen.qp(self.result, self.num_iterations, self.target, self.x0)
+		qpgen.run(self.data)
 		return self.getControl()
 	
 	def sim(self):

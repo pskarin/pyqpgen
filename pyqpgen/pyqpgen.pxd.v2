@@ -1,6 +1,0 @@
-cdef extern from "../qp_files/QPgen.h":
-
-	ctypedef struct DATA:
-		pass
-
-	void qp(DATA *d, double *x_out, int *iter, double *gt, double *bt)

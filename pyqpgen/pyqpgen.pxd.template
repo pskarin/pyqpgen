@@ -1,12 +1,10 @@
-cdef extern void qp(double *x_out, int *iter, double *gt, double *bt)
-
 cdef extern from "pyqpgen-constants.h":
 
 	cdef int NUM_INPUTS
 	cdef int NUM_STATES
 	cdef int HORIZON
 
-cdef extern from "pyqpgen-data.h":
+cdef extern from "pyqpgen-wrap.h":
 	ctypedef struct PyQPgenData:
 		pass
 
@@ -19,4 +17,5 @@ cdef extern from "pyqpgen-data.h":
 	double * result(PyQPgenData * o)
 	double * x1(PyQPgenData * o)
 
+	void run(PyQPgenData * o)
 	void sim(PyQPgenData * o)

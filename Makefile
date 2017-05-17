@@ -44,25 +44,25 @@ qplib: $(WS)/qp_files/QPgen.c
 # rule. So far QPgen has been executed through matlab and all C code is ready.
 # Now compile relevant files in qp_files and generate $(WS)/{lib}.so using
 # Cython then merge this into the final library.
-$(OUTPUT): $(QPOBJ) $(WS)/$(LIBNAME).o $(WS)/pyqpgen-data.o
+$(OUTPUT): $(QPOBJ) $(WS)/$(LIBNAME).o $(WS)/pyqpgen-wrap.o
 	$(LD) -shared $^ -o $(OUTPUT)
 
 
-PXDVERSIONS=pyqpgen/pyqpgen.pxd.v1 pyqpgen/pyqpgen.pxd.v2
-PYXVERSIONS=pyqpgen/pyqpgen.pyx.v1 pyqpgen/pyqpgen.pyx.v2
+PXDTEMPLATE=pyqpgen/pyqpgen.pxd.template
+PYXTEMPLATE=pyqpgen/pyqpgen.pyx.template
 PXDOUT=$(WS)/$(LIBNAME).pxd
 PYXOUT=$(WS)/$(LIBNAME).pyx
 CYTHONOUT=$(WS)/$(LIBNAME).c
 
 # pyqpgen/precython.bash copies and manipulates the templates for .pxd and
 # .pyx files pyqpgen/ to $(WS)/.
-$(PXDOUT): $(PXDVERSIONS) pyqpgen/precython.bash
-	@bash pyqpgen/precython.bash $(WS) $(LIBNAME) pxd
+$(PXDOUT): $(PXDTEMPLATE) pyqpgen/precython.bash
+	bash pyqpgen/precython.bash $(WS) $(LIBNAME) pxd $(WITHSIM)
 
 # pyqpgen/precython.bash copies and manipulates the templates for .pxd and
 # .pyx files pyqpgen/ to $(WS)/.
-$(PYXOUT): $(PYXVERSIONS) pyqpgen/precython.bash
-	@bash pyqpgen/precython.bash $(WS) $(LIBNAME) pyx
+$(PYXOUT): $(PYXTEMPLATE) pyqpgen/precython.bash
+	bash pyqpgen/precython.bash $(WS) $(LIBNAME) pyx $(WITHSIM)
 
 # Runs Cython on files located in $(WS)/.
 $(CYTHONOUT): $(PXDOUT) $(PYXOUT)
@@ -84,9 +84,9 @@ endif
 # Clean the stuff created by and generated for Cython
 cleancython:
 	@rm -f $(PYXOUT) $(PXDOUT) $(CYTHONOUT)
-	@rm -f $(WS)/pyqpgen-data.c
-	@rm -f $(WS)/pyqpgen-data.h
-	@rm -f $(WS)/pyqpgen-data.o
+	@rm -f $(WS)/pyqpgen-wrap.c
+	@rm -f $(WS)/pyqpgen-wrap.h
+	@rm -f $(WS)/pyqpgen-wrap.o
 	
 # Remove the final library
 cleanlib:

@@ -1,24 +1,35 @@
 #!/bin/bash
 
-WS=$1
+WS=$1;
 LIBNAME=$2;
-MODE=$3
-VERSION=1;
+MODE=$3;
 
 if [ -e ${WS}/qp_files/data_struct.h ];
 then
-	VERSION=2;
+	QPFUNC="extern void qp(struct DATA * d, double *x_out, int *iter, double *gt, double *bt);";
+	DATAMEMBER="struct DATA data;";
+	HINCLUDE="#include \"data_struct.h\"";
+	CINCLUDE="extern void init_data(struct DATA *d); extern void free_data(struct DATA *d);";
+	RUNIMP="  init_data(&o->data); qp(&o->data, o->result, &o->num_iterations, o->target, o->x0); free_data(&o->data);";
+else
+	QPFUNC="extern void qp(double *x_out, int *iter, double *gt, double *bt);";
+	DATAMEMBER="";
+	HINCLUDE="";
+	CINCLUDE="";
+	RUNIMP="  qp(o->result, &o->num_iterations, o->target, o->x0);";
 fi;
 
 if [ ${MODE} == "pxd" ]; then
-	cat > ${WS}/pyqpgen-data.h <<__END
+	cat > ${WS}/pyqpgen-wrap.h <<__END
 #include "pyqpgen-constants.h"
+${HINCLUDE}
 typedef struct __PyQPgenData {
 	double target[(NUM_STATES + NUM_INPUTS) * HORIZON];
 	double x0[NUM_STATES];
 	double result[(NUM_STATES + NUM_INPUTS) * HORIZON];
 	int num_iterations;
 	double x1[NUM_STATES];
+	${DATAMEMBER}
 } PyQPgenData;
 
 PyQPgenData * allocate();
@@ -31,10 +42,16 @@ double * result(PyQPgenData * o);
 double * x1(PyQPgenData * o);
 
 void sim(PyQPgenData * o);
+
+void run(PyQPgenData * o);
 __END
-	cat > ${WS}/pyqpgen-data.c <<__END
-#include "pyqpgen-data.h"
+	cat > ${WS}/pyqpgen-wrap.c <<__END
+#include "pyqpgen-wrap.h"
 #include <stdlib.h>
+
+${CINCLUDE}
+
+${QPFUNC}
 
 PyQPgenData * allocate() {
 	return (PyQPgenData *) calloc(1, sizeof(PyQPgenData));
@@ -49,6 +66,10 @@ double * x0(PyQPgenData * o) { return &o->x0[0]; }
 int * num_iterations(PyQPgenData * o) { return &o->num_iterations; }
 double * result(PyQPgenData * o) { return &o->result[0]; }
 double * x1(PyQPgenData * o) { return &o->x1[0]; }
+
+void run(PyQPgenData * o) {
+${RUNIMP}
+}
 
 static const double matA[] = ADATA;
 static const double matB[] = BDATA;
@@ -70,7 +91,7 @@ void sim(PyQPgenData * o) {
 	}
 }
 __END
-	cp pyqpgen/pyqpgen.pxd.v${VERSION} ${WS}/${LIBNAME}.pxd
+	cat pyqpgen/pyqpgen.pxd.template > ${WS}/${LIBNAME}.pxd
 else
-	cat pyqpgen/pyqpgen.pyx.v${VERSION} | sed "s/cimport pyqpgen as qpgen/cimport ${LIBNAME} as qpgen/" > ${WS}/${LIBNAME}.pyx
+	cat pyqpgen/pyqpgen.pyx.template | sed "s/#LIBNAME/${LIBNAME}/" > ${WS}/${LIBNAME}.pyx
 fi
