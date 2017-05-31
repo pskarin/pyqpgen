@@ -7,6 +7,9 @@ else
 end
 
 len = length(str);
+if len == 1
+  str = strcat('{', str, '}');
+end
 
 for jj = 1:len
     if isequal(str(jj),'[')
