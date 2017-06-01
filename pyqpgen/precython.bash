@@ -46,9 +46,12 @@ double * result(PyQPgenData * o);
 double * x1(PyQPgenData * o);
 double * u(PyQPgenData * o);
 
-void sim(PyQPgenData * o);
-
 void run(PyQPgenData * o);
+
+const double * getA();
+const double * getB();
+
+void sim(PyQPgenData * o);
 __END
 	cat > ${WS}/pyqpgen-wrap.c <<__END
 #include "pyqpgen-wrap.h"
@@ -79,6 +82,9 @@ ${RUNIMP}
 
 static const double matA[] = ADATA;
 static const double matB[] = BDATA;
+
+const double * getA() { return matA; }
+const double * getB() { return matB; }
 
 void sim(PyQPgenData * o) {
 	int i,j,xa,xb;

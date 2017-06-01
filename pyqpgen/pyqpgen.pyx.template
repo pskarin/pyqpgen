@@ -28,7 +28,7 @@ cdef class QP:
 
 	def __dealloc__(self):
 		qpgen.deallocate(&self.data)
-		
+
 	def horizon(self):
 		return qpgen.HORIZON
 
@@ -43,6 +43,9 @@ cdef class QP:
 			raise IndexError("Size of input array ({}) does not match number of states ({})".format(len(values), qpgen.NUM_STATES))
 		for idx in range(0,qpgen.NUM_STATES):
 			self.x0[idx] = values[idx]
+
+	def getState(self):
+		return [self.x0[i] for i in range(0, qpgen.NUM_STATES)]    
 
 	def setTargetInputs(self, values):
 		if len(values) != self.inputssize:
@@ -66,6 +69,14 @@ cdef class QP:
 		
 	def getX1(self):
 		return [self.x1[i] for i in range(0, qpgen.NUM_STATES)]
+
+	def getA(self):
+		cdef const double * A = qpgen.getA()
+		return [A[i] for i in range(0, qpgen.NUM_STATES*qpgen.NUM_STATES)]
+
+	def getB(self):
+		cdef const double * B = qpgen.getB()  
+		return [B[i] for i in range(0, qpgen.NUM_STATES*qpgen.NUM_INPUTS)]
 
 	def run(self):
 		qpgen.run(self.data)
