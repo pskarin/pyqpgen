@@ -1,6 +1,7 @@
 addpath ../qpgen
 user
 % run code generator
+opts.proj_name = getenv('QPPROJ')
 [QP_reform,alg_data] = run_code_gen_MPC(MPC,opts);
 
 fid = fopen('pyqpgen-constants.h', 'w');

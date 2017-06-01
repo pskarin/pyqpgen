@@ -8,10 +8,13 @@ CONFIGDIR=$(shell dirname $(CONFIG))
 MFILE:=$(CONFIGDIR)/$(MFILE)
 
 WS=.ws-$(LIBNAME)
+QPPROJ?=qp
+QPDIRNAME=$(QPPROJ)_files
+QPDATADIRNAME=$(QPPROJ)_data
 
 .PHONY : default qpgen inform
 
-CFLAGS=-I$(WS)/qp_files -I$(WS) -fPIC
+CFLAGS=-I$(WS)/$(QPDIRNAME) -I$(WS) -fPIC
 CFLAGS += $(shell pkg-config --cflags python)
 
 ifeq ($(strip $(CONFIGDIR)),.)
@@ -33,27 +36,27 @@ inform:
 	@echo '>>>>> Output goes into $(CONFIGDIR)/ <<<<<'
 
 # These are the files genrated in step 1 when pyqpgen/generate.m is run.
-QPGENFILES=$(WS)/qp_files/ $(WS)/pyqpgen-constants.h $(WS)/qp_mex.mexa64 $(WS)/user.m
+QPGENFILES=$(WS)/$(QPDIRNAME)/ $(WS)/pyqpgen-constants.h $(WS)/qp_mex.mexa64 $(WS)/user.m
 
 # First thing that needs to be done is to generate QPgen files from the m-file
 # system specification. This is done throught the pyqpgen/generate.m matlab
 # script which also creates a header file with constants.
-$(WS)/qp_files/QPgen.c: $(MFILE) pyqpgen/generate.m
+$(WS)/$(QPDIRNAME)/QPgen.c: $(MFILE) pyqpgen/generate.m
 	$(MAKE) cleannotqpgen
 	cp $(MFILE) $(WS)/user.m
-	cd $(WS) && SYSFILE=$(MFILE) matlab -nodisplay -nojvm -nodesktop -nosplash -r "addpath ../pyqpgen;generate"
-	mkdir -p $(OUTDIR)/qp_files
-	cp -r $(WS)/qp_files/qp_data $(OUTDIR)/qp_files/
+	cd $(WS) && SYSFILE=$(MFILE) QPPROJ=$(QPPROJ) matlab -nodisplay -nojvm -nodesktop -nosplash -r "addpath ../pyqpgen;generate"
+	mkdir -p $(OUTDIR)/$(QPDIRNAME)
+	cp -r $(WS)/$(QPDIRNAME)/$(QPDATADIRNAME) $(OUTDIR)/$(QPDIRNAME)/
 
 # This part reads the source files genrated by QPgen. Depending on the system
 # specification they may differ which is why they are dynamically fetched. This
 # also means that they are not available in the first run and therefore there
 # is an indirection through the qplib rule in which the makefile calls itself.
 QPSOURCE=$(filter-out %/alg_data.c %/qp_mex.c,\
-$(shell find $(WS)/qp_files -iname '*.c' 2>/dev/null))
+$(shell find $(WS)/$(QPDIRNAME) -iname '*.c' 2>/dev/null))
 QPOBJ=$(QPSOURCE:.c=.o)
 
-qplib: $(WS)/qp_files/QPgen.c
+qplib: $(WS)/$(QPDIRNAME)/QPgen.c
 	@$(MAKE) -C . $(OUTPUT)
 
 # This is where we enter when the make file has called itself from the qplib

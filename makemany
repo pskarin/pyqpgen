@@ -1,0 +1,22 @@
+#!/bin/bash
+
+mv .config .config.save;
+for mf in $@;
+do
+  D=$(dirname $mf);
+  L=$(basename $mf .m);
+  MK=$D/.makemany.mk;
+  echo LIBNAME=qp$L > $MK;
+  echo MFILE=$L.m >> $MK;
+  echo QPPROJ=$L >> $MK;
+  popd >/dev/null;
+  make CONFIG=$MK;
+  if [ $? -ne 0 ];
+  then
+    echo "ERROR";
+    mv .config.save .config;
+    exit 1;
+  fi;
+  rm $MK;
+done;
+mv .config.save .config;
