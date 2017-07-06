@@ -50,6 +50,8 @@ void run(PyQPgenData * o);
 
 const double * getA();
 const double * getB();
+const double * getQ();
+const double * getR();
 
 void sim(PyQPgenData * o);
 __END
@@ -82,9 +84,13 @@ ${RUNIMP}
 
 static const double matA[] = ADATA;
 static const double matB[] = BDATA;
+static const double matQ[] = QDATA;
+static const double matR[] = RDATA;
 
 const double * getA() { return matA; }
 const double * getB() { return matB; }
+const double * getQ() { return matQ; }
+const double * getR() { return matR; }
 
 void sim(PyQPgenData * o) {
 	int i,j,xa,xb;

@@ -70,6 +70,17 @@ cdef class QP:
 	def getX1(self):
 		return [self.x1[i] for i in range(0, qpgen.NUM_STATES)]
 
+	def getSampleRate(self):
+		return qpgen.SAMPLE_RATE
+
+	def getR(self):
+		cdef const double * R = qpgen.getR()
+		return [R[i] for i in range(0, qpgen.NUM_INPUTS)]
+
+	def getQ(self):
+		cdef const double * Q = qpgen.getQ()
+		return [Q[i] for i in range(0, qpgen.NUM_STATES*qpgen.NUM_STATES)]
+
 	def getA(self):
 		cdef const double * A = qpgen.getA()
 		return [A[i] for i in range(0, qpgen.NUM_STATES*qpgen.NUM_STATES)]
