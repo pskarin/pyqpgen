@@ -1,114 +1,114 @@
 cimport #LIBNAME as qpgen
 
 cdef class QP:
-	cdef qpgen.PyQPgenData * data
-	cdef double * target
-	cdef double * x0
-	cdef double * result
-	cdef double * x1
-	cdef double * u
-	cdef int * num_iterations
-	cdef int statessize
-	cdef int inputssize
-	cdef int datasize
-	
-	def __cinit__(self):
-		self.data = qpgen.allocate()
-				
-		self.target = qpgen.target(self.data)
-		self.x0 = qpgen.x0(self.data)
-		self.num_iterations = qpgen.num_iterations(self.data)
-		self.result = qpgen.result(self.data)
-		self.x1 = qpgen.x1(self.data)
-		self.u = qpgen.u(self.data)
-		
-		self.statessize =  qpgen.NUM_STATES*qpgen.HORIZON
-		self.inputssize =  qpgen.NUM_INPUTS*qpgen.HORIZON
-		self.datasize = self.statessize+self.inputssize
+  cdef qpgen.PyQPgenData * data
+  cdef double * target
+  cdef double * x0
+  cdef double * result
+  cdef double * x1
+  cdef double * u
+  cdef int * num_iterations
+  cdef int statessize
+  cdef int inputssize
+  cdef int datasize
+  
+  def __cinit__(self):
+    self.data = qpgen.allocate()
+        
+    self.target = qpgen.target(self.data)
+    self.x0 = qpgen.x0(self.data)
+    self.num_iterations = qpgen.num_iterations(self.data)
+    self.result = qpgen.result(self.data)
+    self.x1 = qpgen.x1(self.data)
+    self.u = qpgen.u(self.data)
+    
+    self.statessize =  qpgen.NUM_STATES*qpgen.HORIZON
+    self.inputssize =  qpgen.NUM_INPUTS*qpgen.HORIZON
+    self.datasize = self.statessize+self.inputssize
 
-	def __dealloc__(self):
-		qpgen.deallocate(&self.data)
+  def __dealloc__(self):
+    qpgen.deallocate(&self.data)
 
-	def horizon(self):
-		return qpgen.HORIZON
+  def horizon(self):
+    return qpgen.HORIZON
 
-	def numStates(self):
-		return qpgen.NUM_STATES
+  def numStates(self):
+    return qpgen.NUM_STATES
 
-	def numInputs(self):
-		return qpgen.NUM_INPUTS
+  def numInputs(self):
+    return qpgen.NUM_INPUTS
 
-	def setState(self, values):		
-		if len(values) != qpgen.NUM_STATES:
-			raise IndexError("Size of input array ({}) does not match number of states ({})".format(len(values), qpgen.NUM_STATES))
-		for idx in range(0,qpgen.NUM_STATES):
-			self.x0[idx] = values[idx]
+  def setState(self, values):    
+    if len(values) != qpgen.NUM_STATES:
+      raise IndexError("Size of input array ({}) does not match number of states ({})".format(len(values), qpgen.NUM_STATES))
+    for idx in range(0,qpgen.NUM_STATES):
+      self.x0[idx] = values[idx]
 
-	def getState(self):
-		return [self.x0[i] for i in range(0, qpgen.NUM_STATES)]    
+  def getState(self):
+    return [self.x0[i] for i in range(0, qpgen.NUM_STATES)]    
 
-	def setTargetInputs(self, values):
-		if len(values) != self.inputssize:
-			raise IndexError("Size of input array does ({}) not match number of inputs ({}x{}={})".format(len(values), qpgen.NUM_INPUTS, qpgen.HORIZON, self.inputssize))
-		j = self.statessize
-		for i in range(0,self.inputssize):
-			self.target[j] = -values[i]
-			j += 1
+  def setTargetInputs(self, values):
+    if len(values) != self.inputssize:
+      raise IndexError("Size of input array does ({}) not match number of inputs ({}x{}={})".format(len(values), qpgen.NUM_INPUTS, qpgen.HORIZON, self.inputssize))
+    j = self.statessize
+    for i in range(0,self.inputssize):
+      self.target[j] = -values[i]
+      j += 1
 
-	def setTargetStates(self, values):
-		if len(values) != self.statessize:
-			raise IndexError("Size of input array ({}) does not match number of states ({}x{}={})".format(len(values), qpgen.NUM_STATES, qpgen.HORIZON, self.statessize))
-		for i in range(0,self.statessize):
-			self.target[i] = -values[i]
+  def setTargetStates(self, values):
+    if len(values) != self.statessize:
+      raise IndexError("Size of input array ({}) does not match number of states ({}x{}={})".format(len(values), qpgen.NUM_STATES, qpgen.HORIZON, self.statessize))
+    for i in range(0,self.statessize):
+      self.target[i] = -values[i]
 
-	def getTargetStates(self):
-		return [self.target[i] for i in range(0, self.statessize)]
+  def getTargetStates(self):
+    return [self.target[i] for i in range(0, self.statessize)]
 
-	def getControl(self):
-		return [self.result[i] for i in range(self.statessize, self.statessize+qpgen.NUM_INPUTS)]
+  def getControl(self):
+    return [self.result[i] for i in range(self.statessize, self.statessize+qpgen.NUM_INPUTS)]
 
-	def getFullStateVector(self):
-		return [self.result[i] for i in range(0, self.statessize)]
+  def getFullStateVector(self):
+    return [self.result[i] for i in range(0, self.statessize)]
 
-	def getFullControlVector(self):
-		return [self.result[i] for i in range(self.statessize, self.datasize)]
-		
-	def getFullDataVector(self):
-		return [self.result[i] for i in range(0, self.datasize)]
-	
-	def getNumberOfIterations(self):
-		return self.num_iterations[0]
-		
-	def getX1(self):
-		return [self.x1[i] for i in range(0, qpgen.NUM_STATES)]
+  def getFullControlVector(self):
+    return [self.result[i] for i in range(self.statessize, self.datasize)]
+    
+  def getFullDataVector(self):
+    return [self.result[i] for i in range(0, self.datasize)]
+  
+  def getNumberOfIterations(self):
+    return self.num_iterations[0]
+    
+  def getX1(self):
+    return [self.x1[i] for i in range(0, qpgen.NUM_STATES)]
 
-	def getSampleRate(self):
-		return qpgen.SAMPLE_RATE
+  def getSampleRate(self):
+    return qpgen.SAMPLE_RATE
 
-	def getR(self):
-		cdef const double * R = qpgen.getR()
-		return [R[i] for i in range(0, qpgen.NUM_INPUTS)]
+  def getR(self):
+    cdef const double * R = qpgen.getR()
+    return [R[i] for i in range(0, qpgen.NUM_INPUTS)]
 
-	def getQ(self):
-		cdef const double * Q = qpgen.getQ()
-		return [Q[i] for i in range(0, qpgen.NUM_STATES*qpgen.NUM_STATES)]
+  def getQ(self):
+    cdef const double * Q = qpgen.getQ()
+    return [Q[i] for i in range(0, qpgen.NUM_STATES*qpgen.NUM_STATES)]
 
-	def getA(self):
-		cdef const double * A = qpgen.getA()
-		return [A[i] for i in range(0, qpgen.NUM_STATES*qpgen.NUM_STATES)]
+  def getA(self):
+    cdef const double * A = qpgen.getA()
+    return [A[i] for i in range(0, qpgen.NUM_STATES*qpgen.NUM_STATES)]
 
-	def getB(self):
-		cdef const double * B = qpgen.getB()  
-		return [B[i] for i in range(0, qpgen.NUM_STATES*qpgen.NUM_INPUTS)]
+  def getB(self):
+    cdef const double * B = qpgen.getB()  
+    return [B[i] for i in range(0, qpgen.NUM_STATES*qpgen.NUM_INPUTS)]
 
-	def run(self):
-		qpgen.run(self.data)
-		return self.getControl()
-	
-	def sim(self, u):
-		if len(u) != qpgen.NUM_INPUTS:
-			raise IndexError("Size of input array ({}) does not match number of inputs ({})".format(len(u), qpgen.NUM_INPUTS))
-		for i in range(0,qpgen.NUM_INPUTS):
-			self.u[i] = u[i]
-		qpgen.sim(self.data)
-		return self.getX1()
+  def run(self):
+    qpgen.run(self.data)
+    return self.getControl()
+  
+  def sim(self, u):
+    if len(u) != qpgen.NUM_INPUTS:
+      raise IndexError("Size of input array ({}) does not match number of inputs ({})".format(len(u), qpgen.NUM_INPUTS))
+    for i in range(0,qpgen.NUM_INPUTS):
+      self.u[i] = u[i]
+    qpgen.sim(self.data)
+    return self.getX1()

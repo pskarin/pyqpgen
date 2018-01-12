@@ -1,31 +1,31 @@
 cdef extern from "pyqpgen-constants.h":
 
-	cdef int NUM_INPUTS
-	cdef int NUM_STATES
-	cdef int SAMPLE_RATE 
-	cdef int HORIZON
+  cdef int NUM_INPUTS
+  cdef int NUM_STATES
+  cdef int SAMPLE_RATE 
+  cdef int HORIZON
 
 cdef extern from "pyqpgen-wrap.h":
-	ctypedef struct PyQPgenData:
-		pass
+  ctypedef struct PyQPgenData:
+    pass
 
-	PyQPgenData * allocate()
-	void deallocate(PyQPgenData ** o)
+  PyQPgenData * allocate()
+  void deallocate(PyQPgenData ** o)
 
-	double * target(PyQPgenData * o)
-	double * x0(PyQPgenData * o)
-	int * num_iterations(PyQPgenData * o)
-	double * result(PyQPgenData * o)
-	double * x1(PyQPgenData * o)
-	double * u(PyQPgenData * o)
+  double * target(PyQPgenData * o)
+  double * x0(PyQPgenData * o)
+  int * num_iterations(PyQPgenData * o)
+  double * result(PyQPgenData * o)
+  double * x1(PyQPgenData * o)
+  double * u(PyQPgenData * o)
 
 
-	void run(PyQPgenData * o)
-	void sim(PyQPgenData * o)
+  void run(PyQPgenData * o)
+  void sim(PyQPgenData * o)
   
-	int getSampleRate()
+  int getSampleRate()
 
-	double * getR()
-	double * getQ()
-	double * getA()
-	double * getB()
+  double * getR()
+  double * getQ()
+  double * getA()
+  double * getB()
