@@ -12,17 +12,17 @@ d = 0.1;
 A = [ 0 1 0; 0 0 -g*fc; 0 0 0];
 B = [ 0; 0; d];
 
-% Sampled at 25ms
-h = 0.025;
+% Sampled at 50ms
+h = 0.05;
 PhiGamma = expm([A B; zeros(1,length(A)) 0]*h);
 MPC.Adyn = PhiGamma(1:length(A),1:length(A));
 MPC.Bdyn = PhiGamma(1:length(A),length(A)+1);
 MPC.h = h;
 
 % Costs
-MPC.Q = diag([400, 50, 0]);
+MPC.Q = diag([40, 5, 0]);
 MPC.R = 0.25;
-MPC.N = 60;
+MPC.N = 40;
 
 % Must be set
 MPC.gt = 1;
@@ -31,7 +31,7 @@ MPC.gt = 1;
 MPC.Cx = [1 0 0; 0 0 1];
 MPC.X.Ub = [0.55;1];
 MPC.X.Lb = -MPC.X.Ub;
-MPC.X.soft = [inf;1e5];
+MPC.X.soft = [inf; 1e5];
 
 % Input restrictions.
 MPC.Cu = [1];
