@@ -71,7 +71,10 @@ cdef class QP:
 		return [self.result[i] for i in range(0, self.statessize)]
 
 	def getFullControlVector(self):
-		return [self.result[i] for i in range(0, self.statessize)]
+		return [self.result[i] for i in range(self.statessize, self.datasize)]
+		
+	def getFullDataVector(self):
+		return [self.result[i] for i in range(0, self.datasize)]
 	
 	def getNumberOfIterations(self):
 		return self.num_iterations[0]
