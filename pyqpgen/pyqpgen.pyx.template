@@ -52,14 +52,14 @@ cdef class QP:
 			raise IndexError("Size of input array does ({}) not match number of inputs ({}x{}={})".format(len(values), qpgen.NUM_INPUTS, qpgen.HORIZON, self.inputssize))
 		j = self.statessize
 		for i in range(0,self.inputssize):
-			self.target[j] = values[i]
+			self.target[j] = -values[i]
 			j += 1
 
 	def setTargetStates(self, values):
 		if len(values) != self.statessize:
 			raise IndexError("Size of input array ({}) does not match number of states ({}x{}={})".format(len(values), qpgen.NUM_STATES, qpgen.HORIZON, self.statessize))
 		for i in range(0,self.statessize):
-			self.target[i] = values[i]
+			self.target[i] = -values[i]
 
 	def getControl(self):
 		return [self.result[i] for i in range(self.statessize, self.statessize+qpgen.NUM_INPUTS)]
