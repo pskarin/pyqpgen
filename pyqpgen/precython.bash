@@ -50,8 +50,19 @@ void run(PyQPgenData * o);
 
 const double * getA();
 const double * getB();
+
 const double * getQ();
 const double * getR();
+
+const double * getCx();
+const double * getXUb();
+const double * getXLb();
+const double * getXSoft();
+
+const double * getCu();
+const double * getUUb();
+const double * getULb();
+const double * getUSoft();
 
 void sim(PyQPgenData * o);
 __END
@@ -86,11 +97,27 @@ static const double matA[] = ADATA;
 static const double matB[] = BDATA;
 static const double matQ[] = QDATA;
 static const double matR[] = RDATA;
+static const double matCx[] = CxDATA;
+static const double matXUb[] = XUbDATA;
+static const double matXLb[] = XLbDATA;
+static const double matXSoft[] = XSoftDATA;
+static const double matCu[] = CuDATA;
+static const double matUUb[] = UUbDATA;
+static const double matULb[] = ULbDATA;
+static const double matUSoft[] = USoftDATA;
 
 const double * getA() { return matA; }
 const double * getB() { return matB; }
 const double * getQ() { return matQ; }
 const double * getR() { return matR; }
+const double * getCx() { return matCx; }
+const double * getXUb() { return matXUb; }
+const double * getXLb() { return matXLb; }
+const double * getXSoft() { return matXSoft; }
+const double * getCu() { return matCu; }
+const double * getUUb() { return matUUb; }
+const double * getULb() { return matULb; }
+const double * getUSoft() { return matUSoft; }
 
 void sim(PyQPgenData * o) {
 	int i,j,xa,xb;

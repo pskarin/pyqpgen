@@ -2,8 +2,13 @@ cdef extern from "pyqpgen-constants.h":
 
   cdef int NUM_INPUTS
   cdef int NUM_STATES
+  cdef int NUM_OUTPUTS
   cdef int SAMPLE_RATE 
   cdef int HORIZON
+  cdef int MAX_ITERATIONS
+  cdef double TOLERANCE
+  cdef int XSoftDATA_size
+  cdef int USoftDATA_size
 
 cdef extern from "pyqpgen-wrap.h":
   ctypedef struct PyQPgenData:
@@ -25,7 +30,18 @@ cdef extern from "pyqpgen-wrap.h":
   
   int getSampleRate()
 
-  double * getR()
-  double * getQ()
   double * getA()
   double * getB()
+
+  double * getR()
+  double * getQ()
+
+  double * getCx()
+  double * getXUb()
+  double * getXLb()
+  double * getXSoft()
+
+  double * getCu()
+  double * getUUb()
+  double * getULb()
+  double * getUSoft()

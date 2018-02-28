@@ -41,7 +41,7 @@ QPGENFILES=$(WS)/$(QPDIRNAME)/ $(WS)/pyqpgen-constants.h $(WS)/qp_mex.mexa64 $(W
 # First thing that needs to be done is to generate QPgen files from the m-file
 # system specification. This is done throught the pyqpgen/generate.m matlab
 # script which also creates a header file with constants.
-$(WS)/$(QPDIRNAME)/QPgen.c: $(MFILE) pyqpgen/generate.m
+$(WS)/$(QPDIRNAME)/QPgen.c: $(MFILE) pyqpgen/generate.m pyqpgen/pdouble.m
 	$(MAKE) cleannotqpgen
 	cp $(MFILE) $(WS)/user.m
 	cd $(WS) && SYSFILE=$(MFILE) QPPROJ=$(QPPROJ) matlab -nodisplay -nojvm -nodesktop -nosplash -r "addpath ../pyqpgen;generate"

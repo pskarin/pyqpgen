@@ -29,14 +29,12 @@ cdef class QP:
   def __dealloc__(self):
     qpgen.deallocate(&self.data)
 
-  def horizon(self):
-    return qpgen.HORIZON
-
-  def numStates(self):
-    return qpgen.NUM_STATES
-
-  def numInputs(self):
-    return qpgen.NUM_INPUTS
+  def horizon(self): return qpgen.HORIZON
+  def numStates(self): return qpgen.NUM_STATES
+  def numInputs(self): return qpgen.NUM_INPUTS
+  def numOutputs(self): return qpgen.NUM_OUTPUTS
+  def tolerance(self): return qpgen.TOLERANCE
+  def maxIterations(self): return qpgen.MAX_ITERATIONS
 
   def setState(self, values):    
     if len(values) != qpgen.NUM_STATES:
@@ -85,21 +83,21 @@ cdef class QP:
   def getSampleRate(self):
     return qpgen.SAMPLE_RATE
 
-  def getR(self):
-    cdef const double * R = qpgen.getR()
-    return [R[i] for i in range(0, qpgen.NUM_INPUTS)]
+  cdef dblList(self, const double * a, unsigned int offs, unsigned int len):
+    return [a[i] for i in range(offs, len)]
 
-  def getQ(self):
-    cdef const double * Q = qpgen.getQ()
-    return [Q[i] for i in range(0, qpgen.NUM_STATES*qpgen.NUM_STATES)]
-
-  def getA(self):
-    cdef const double * A = qpgen.getA()
-    return [A[i] for i in range(0, qpgen.NUM_STATES*qpgen.NUM_STATES)]
-
-  def getB(self):
-    cdef const double * B = qpgen.getB()  
-    return [B[i] for i in range(0, qpgen.NUM_STATES*qpgen.NUM_INPUTS)]
+  def getA(self)    : return self.dblList(qpgen.getA(), 0, qpgen.NUM_STATES*qpgen.NUM_STATES)
+  def getB(self)    : return self.dblList(qpgen.getB(), 0, qpgen.NUM_STATES*qpgen.NUM_INPUTS)
+  def getR(self)    : return self.dblList(qpgen.getR(), 0, qpgen.NUM_INPUTS)
+  def getQ(self)    : return self.dblList(qpgen.getQ(), 0, qpgen.NUM_STATES*qpgen.NUM_STATES)
+  def getCx(self)   : return self.dblList(qpgen.getCx(), 0, qpgen.NUM_STATES*qpgen.NUM_OUTPUTS)
+  def getXUb(self)  : return self.dblList(qpgen.getXUb(), 0, qpgen.NUM_OUTPUTS)
+  def getXLb(self)  : return self.dblList(qpgen.getXLb(), 0, qpgen.NUM_OUTPUTS)
+  def getXSoft(self): return self.dblList(qpgen.getXSoft(), 0,  min(qpgen.XSoftDATA_size, qpgen.NUM_OUTPUTS))
+  def getCu(self)   : return self.dblList(qpgen.getCu(), 0, qpgen.NUM_INPUTS)
+  def getUUb(self)  : return self.dblList(qpgen.getUUb(), 0, qpgen.NUM_INPUTS)
+  def getULb(self)  : return self.dblList(qpgen.getULb(), 0, qpgen.NUM_INPUTS)
+  def getUSoft(self): return self.dblList(qpgen.getUSoft(), 0, min(qpgen.USoftDATA_size, qpgen.NUM_INPUTS))
 
   def run(self):
     qpgen.run(self.data)
