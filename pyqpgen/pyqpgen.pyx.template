@@ -61,8 +61,17 @@ cdef class QP:
 		for i in range(0,self.statessize):
 			self.target[i] = -values[i]
 
+	def getTargetStates(self):
+		return [self.target[i] for i in range(0, self.statessize)]
+
 	def getControl(self):
 		return [self.result[i] for i in range(self.statessize, self.statessize+qpgen.NUM_INPUTS)]
+
+	def getFullStateVector(self):
+		return [self.result[i] for i in range(0, self.statessize)]
+
+	def getFullControlVector(self):
+		return [self.result[i] for i in range(0, self.statessize)]
 	
 	def getNumberOfIterations(self):
 		return self.num_iterations[0]
