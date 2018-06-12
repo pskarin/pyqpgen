@@ -11,6 +11,8 @@ import time
 import collections
 
 parser = argparse.ArgumentParser(description='Plot UDP input')
+parser.add_argument('-t', '--title', default="UDP Plot", metavar='string',
+									help='Sets a title to the figure')
 parser.add_argument('-a', '--address', default='localhost', metavar='ipv4-address',
                   help='Address to bind to (default: localhost)')
 parser.add_argument('-p', '--port', type=int, default=51001, metavar='number',
@@ -40,7 +42,8 @@ sock.bind((args.address, int(args.port)))
 rows=cols=round(math.sqrt(numvars))
 if rows*cols < numvars:
   rows += 1
-fig = plt.figure(figsize=(16,9))
+fig = plt.figure(figsize=(8,4))
+fig.canvas.set_window_title(args.title)
 
 # some X and Y data
 numdatapoints=int(math.ceil(args.graphlen/h));
