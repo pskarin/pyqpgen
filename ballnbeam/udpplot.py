@@ -42,7 +42,7 @@ sock.bind((args.address, int(args.port)))
 rows=cols=round(math.sqrt(numvars))
 if rows*cols < numvars:
   rows += 1
-fig = plt.figure(figsize=(8,4))
+fig = plt.figure(figsize=(8,6))
 fig.canvas.set_window_title(args.title)
 
 # some X and Y data
