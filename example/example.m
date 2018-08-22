@@ -1,4 +1,7 @@
-% specify dynamics (sampled with 50 ms sampling time)
+% Sampling period
+MPC.h = 0.05;
+
+% Dynamics (sampled at 20 Hz)
 MPC.Adyn = [0.9993 -3.0083 -0.1131 -1.6081;
            -0.0000  0.9862  0.0478  0.0000;
             0.0000  2.0833  1.0089 -0.0000;
