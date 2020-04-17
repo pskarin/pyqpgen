@@ -1,5 +1,7 @@
 cimport #LIBNAME as qpgen
 
+import numpy as np
+
 cdef class QP:
   cdef qpgen.PyQPgenData * data
   cdef double * target
@@ -44,6 +46,13 @@ cdef class QP:
 
   def getState(self):
     return [self.x0[i] for i in range(0, qpgen.NUM_STATES)]    
+
+  def setTargetState(self, x):
+    if len(x) != qpgen.NUM_STATES:
+      raise IndexError("Size of input array does ({}) not match number of states ({})".format(len(x), qpgen.NUM_STATES))
+    Q = np.array(self.getQ()).reshape(qpgen.NUM_STATES, qpgen.NUM_STATES)
+    self.setTargetStates(np.tile(np.dot(Q, x), qpgen.HORIZON).reshape(qpgen.NUM_STATES*qpgen.HORIZON, 1))
+    
 
   def setTargetInputs(self, values):
     if len(values) != self.inputssize:

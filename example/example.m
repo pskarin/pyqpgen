@@ -17,6 +17,9 @@ MPC.gt = 1;
 MPC.Cx = [0 1 0 0;0 0 0 1];
 MPC.X.Ub = [0.5;100];
 MPC.X.Lb = -[0.5;100];
+MPC.Xf.Ub = [0.1,1];
+MPC.Xf.Lb = -[0.1,1];
+
 MPC.X.soft = [1e5;1e5];
 
 % specify hard input constraints
@@ -25,7 +28,7 @@ MPC.U.Ub = [25;25];
 MPC.U.Lb = -[25;25];
 
 % control horizon
-MPC.N = 10;
+MPC.N = 3;
 
 % decrease optimality tolerance
 opts.rel_tol = 1e-4;

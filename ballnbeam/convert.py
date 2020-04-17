@@ -7,6 +7,6 @@ def angle2deg(x): return (180/math.pi)*x
 def in2angle(x): return v2angle(in2v(x))
 def v2position(x): return (x/10.0)*0.55
 def position2v(x): return (x/0.55)*10.0
-def v2angular(x): return (x/10.0)*(math.pi*2)
-def angular2v(x): return (10*x)/(math.pi*2)
+def v2angular(x): return (x/10.0)*4.4
+def angular2v(x): return (10*x)/4.4
 def in2position(x): v2position(in2v(x))
