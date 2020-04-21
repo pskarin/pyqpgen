@@ -10,9 +10,14 @@ import select
 import mmap
 import struct
 import os
+import copy
+import socket
+import struct
+import numpy as np
 
 G = 9.80665*5.0/7.0
 MAX_ANGLE = math.pi
+AUTO_RESET_TIME = 5 # Automatically reset state after 10 seconds
 
 # BALL AND BEAM SIMULATION PRIMITIVES
 class BBSimBase(object):
@@ -32,14 +37,22 @@ class BBSimEuler(BBSimBase):
     self.stepIterations = stepIterations
     self.netdelay = netdelay
     self.posmax = beamlength/2
-
+    self.angle_noise = an;
+    self.position_noise = pn;
     self.reset()
+
+  def set_angle_noise(n):
+    self.angle_noise = n
+
+  def set_position_noise(n):
+    self.position_noise = n
 
   def reset(self):
     self.u = 0                # The input signal on the writers end
     self.theta = 0            # The beam angle
     self.speed = 0            # The ball speed
     self.position = 0         # The ball position
+    self.off = False          # If the ball falls of
     self.sampledPosition = 0  # The position on the readers end of the network
     self.uQueue = []
     self.sampleQueue = []
@@ -106,8 +119,11 @@ class BBSimEuler(BBSimBase):
     u = self.uQueue.pop()
     s = sec/self.stepIterations
     for i in range(1, self.stepIterations):
-      self.speed = self.evolveSpeed(self.theta, self.speed, s)  # Set the acceleration of the ball
-      self.position = self.evolvePosition(self.speed, self.position, s)
+      if not self.off:
+        self.speed = self.evolveSpeed(self.theta, self.speed, s)  # Set the acceleration of the ball
+        self.position = self.evolvePosition(self.speed, self.position, s)
+        if abs(self.position) > self.posmax:
+          self.off = True
       self.theta = self.evolveTheta(self.theta, u, s)       # Set the angle of beam after 'sec'
     self.sampleQueue.append(self.position)
     self.sampledPosition = self.sampleQueue.pop(0)
@@ -352,7 +368,9 @@ class BBSimActivityBase(object):
     global _state
 
     t=period
-    next = time.time()+t
+    lastinput = time.time()
+    ballon = time.time()
+    nexttime = time.time();
     infoDump=int(0.5/t)
     infoDumpCnt = 0
     inpoll = select.poll()
@@ -380,11 +398,14 @@ class BBSimActivityBase(object):
       self.write_output(pos, angle, bbsim.getBallSpeed())
 
       _lock.acquire()
-      _state[id] = {'angle': angle, 'pos': pos, 'speed': speed}
+      _state[id] = {'angle': angle, 'pos': pos, 'speed': speed, 'angle_noisy': angle_noisy, 'pos_noisy': pos_noisy}
       _lock.release()
-    
-      time.sleep(max(0, next-time.time()))
-      next += t
+
+      if not bbsim.off:
+        ballon = nexttime # nexttime is now
+  
+      nexttime += t
+      time.sleep(max(0, nexttime-time.time()))
 
 
 class BBSimPosixQueue(BBSimActivityBase):
@@ -476,6 +497,7 @@ def sig_int_handler(signum, frame):
   global _sigint
   _sigint(signum, frame)
 
+<<<<<<< HEAD
 def thread_main(bb, h):
   bb.setup_communication()
   bb.run(BBSim(coulombFrictionFactor=0.01), h, bb.id)
@@ -496,6 +518,8 @@ if __name__ == "__main__":
                     help='Update interval in milliseconds (default 10 ms)')
   parser.add_argument('--ipc', type=str, default='shm',
                     help='IPC method: shm or queue. Default: shm')
+  parser.add_argument('--send-state', default=None, metavar='{address}:{port}',
+                    help='Send the state as UDP packets. The port specifies a starting port. Each plant increments the port by one.')
 
   args = parser.parse_args()
 
@@ -505,6 +529,10 @@ if __name__ == "__main__":
   os.umask(0)
   _lock = threading.Lock()
   _state = []
+  udp = None
+  if args.send_state:
+    udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    udpaddress = (args.send_state.split(':')[0], int(args.send_state.split(':')[1]))
   for x in range(0, args.plants):
     _state.append({'angle': 0, 'pos': 0, 'speed': 0})
   for x in range(0, args.plants):
@@ -518,9 +546,14 @@ if __name__ == "__main__":
   starttime = time.time()
   while True:
     _lock.acquire()
+    state = copy.deepcopy(_state)
+    _lock.release()
     print("Uptime: {}".format(int(time.time()-starttime)))
     for x in range(0, args.plants):
-      print("\033[0K[Plant {}] pos: {:6.3f}, angle: {:6.3f}, velo: {:6.3f}".format(x, _state[x]['pos'],  _state[x]['angle'],  _state[x]['speed']))
+      print("\033[0K[Plant {}] pos: {:6.3f}, angle: {:6.3f}, velo: {:6.3f}".format(x, state[x]['pos'],  state[x]['angle'],  state[x]['speed']))
+      if udp:
+        udp.sendto(struct.pack('!3d',
+          state[x]['pos'], state[x]['speed'], state[x]['angle']
+          ), (udpaddress[0], udpaddress[1]+x))
     sys.stdout.write("\033[{}A".format(args.plants+1))
-    _lock.release()
-    time.sleep(0.25)
+    time.sleep(0.1)
