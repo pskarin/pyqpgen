@@ -12,7 +12,6 @@ import struct
 import os
 import copy
 import socket
-import struct
 import numpy as np
 
 G = 9.80665*5.0/7.0
@@ -26,7 +25,7 @@ class BBSimBase(object):
 
 # Does a Euler approximation of the ball and beam system
 class BBSimEuler(BBSimBase):
-  def __init__(self, beamlength=1.1, netdelay=0, stepIterations=100, coulombFrictionFactor=0.0):
+  def __init__(self, beamlength=1.1, netdelay=0, stepIterations=100, coulombFrictionFactor=0.0, an=None, pn=None):
     """ beamlength is the length of the beam in meters
         maxspeed is the radians that the beam moves in one second.
         netdelay is the number of samples to delay, not the delay time!
@@ -91,6 +90,7 @@ class BBSimEuler(BBSimBase):
     for i in range(0, self.netdelay): self.sampleQueue.append(ballposition)
 
   def setBeamSpeed(self, volt):
+    #if abs(s) > 0.01:
     self.u = min(self.maxspeed, abs(0.44*volt))
     if volt < 0: self.u = -self.u
 
@@ -384,6 +384,12 @@ class BBSimActivityBase(object):
 #      pollevents = inpoll.poll(0)
 #      if len(pollevents) > 0 and pollevents[0][1] == select.POLLIN:
 #        reset = True
+
+      # TODO: Reset form the controller instead
+      # If the ball has fallen off then reset after auto reset
+      if time.time()-ballon > AUTO_RESET_TIME:
+        reset = True
+
       if reset:
 #        sys.stdin.readline()
         bbsim.reset()
@@ -497,7 +503,6 @@ def sig_int_handler(signum, frame):
   global _sigint
   _sigint(signum, frame)
 
-<<<<<<< HEAD
 def thread_main(bb, h):
   bb.setup_communication()
   bb.run(BBSim(coulombFrictionFactor=0.01), h, bb.id)

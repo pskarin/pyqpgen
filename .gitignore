@@ -3,3 +3,4 @@
 ballnbeam/lib/
 ballnbeam/qp_files/
 pyqpgen.project
+.ws-*
