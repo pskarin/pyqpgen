@@ -192,7 +192,7 @@ class MemMapped(object):
     self.mm.seek(offset)
     ba = bytearray(struct.pack('d', value))
     for b in ba:
-      self.mm.write_byte(chr(b))
+      self.mm.write_byte(b)
 
   def write_byte(self, value, offset):
     self.mm.seek(offset)
@@ -207,8 +207,23 @@ class MemMapped(object):
 
   def read_byte(self, offset):
     self.mm.seek(offset)
-    return ord(self.mm.read_byte())
+    return self.mm.read_byte()
 
+class BBSimInterfaceEuler(BBSimInterface):
+  def __init__(self, id=0):
+    self.sim = BBSimEuler()
+
+  def reset(self):
+    self.sim.reset()
+
+  def get_state(self):
+    return (self.sim.getBallPosition(), self.sim.getBallSpeed(), self.sim.getBeamAngle(), self.sim.u)
+
+  def set_beam_speed(self, volt):
+    self.sim.setBeamSpeed(volt)
+
+  def step(self, h):
+    self.sim.step(h)
     
 class BBSimInterfacePosixShm(BBSimInterface):
   def __init__(self, id=0):
@@ -252,7 +267,7 @@ class BBSimInterfacePosixShm(BBSimInterface):
     pos = self.mm.read_float(16)
     speed = self.mm.read_float(24)
     self.mm.unlock()
-    return (pos, angle, speed, u)
+    return (pos, speed, angle, u)
 
 
 class BBSimInterfacePosixQueue(BBSimInterface):
@@ -403,6 +418,12 @@ class BBSimActivityBase(object):
 
       self.write_output(pos, angle, bbsim.getBallSpeed())
 
+      angle_noisy = pos_noisy = 0
+      if bbsim.angle_noise:
+        angle_noisy = angle+np.random.normal(bbsim.angle_noise[0],  bbsim.angle_noise[1], 1)[0];
+      if bbsim.position_noise:
+        pos_noisy = pos+np.random.normal(bbsim.position_noise[0],  bbsim.position_noise[1], 1)[0];
+
       _lock.acquire()
       _state[id] = {'angle': angle, 'pos': pos, 'speed': speed, 'angle_noisy': angle_noisy, 'pos_noisy': pos_noisy}
       _lock.release()
@@ -420,12 +441,12 @@ class BBSimPosixQueue(BBSimActivityBase):
     BBSimActivityBase.__init__(self, id)
 
   def setup_communication(self):
-    self.qout1 = ipc.MessageQueue("/bbsim_out1-{}".format(bb.id), flags=ipc.O_CREAT, mode=0666, max_messages=1)
-    self.qout2 = ipc.MessageQueue("/bbsim_out2-{}".format(bb.id), flags=ipc.O_CREAT, mode=0666, max_messages=1)
-    self.qin = ipc.MessageQueue("/bbsim_in-{}".format(bb.id), flags=ipc.O_CREAT, mode=0666, max_messages=1)
-    self.qreset = ipc.MessageQueue("/bbsim_reset-{}".format(bb.id), flags=ipc.O_CREAT, mode=0666, max_messages=1)
+    self.qout1 = ipc.MessageQueue("/bbsim_out1-{}".format(bb.id), flags=ipc.O_CREAT, mode=0o666, max_messages=1)
+    self.qout2 = ipc.MessageQueue("/bbsim_out2-{}".format(bb.id), flags=ipc.O_CREAT, mode=0o666, max_messages=1)
+    self.qin = ipc.MessageQueue("/bbsim_in-{}".format(bb.id), flags=ipc.O_CREAT, mode=0o666, max_messages=1)
+    self.qreset = ipc.MessageQueue("/bbsim_reset-{}".format(bb.id), flags=ipc.O_CREAT, mode=0o666, max_messages=1)
     # Provides the possibility to read the state perfectly
-    self.x2 = ipc.MessageQueue("/bbsim_ballspeed-{}".format(bb.id), flags=ipc.O_CREAT, mode=0666, max_messages=1)
+    self.x2 = ipc.MessageQueue("/bbsim_ballspeed-{}".format(bb.id), flags=ipc.O_CREAT, mode=0o666, max_messages=1)
 
   def read_input(self):
     try:
@@ -458,9 +479,16 @@ class BBSimPosixShm(BBSimActivityBase):
   """ A ball and beam class using Posix shared memory message queues """
   def __init__(self, id):
     BBSimActivityBase.__init__(self, id)
-    os.remove("/dev/shm/sem.bbsim_shm_lock-{}".format(id))
-    self.lock = ipc.Semaphore("/bbsim_shm_lock-{}".format(id), flags=ipc.O_CREAT, mode=0666, initial_value=1)
-    self.shm = ipc.SharedMemory("/bbsim_shm-{}".format(id), flags=ipc.O_CREAT, mode=0666, size=1024)
+    lockname = "bbsim_shm_lock-{}".format(id)
+    lockfile = "/dev/shm/sem.{}".format(lockname)
+    memname = "bbsim_shm-{}".format(id)
+    memfile = "/dev/shm/{}".format(memname)
+    if os.path.exists(lockfile):
+      os.remove(lockfile)
+    if os.path.exists(memfile):
+      os.remove(memfile)
+    self.lock = ipc.Semaphore("/{}".format(lockname), flags=ipc.O_CREAT, mode=0o666, initial_value=1)
+    self.shm = ipc.SharedMemory("/{}".format(memname), flags=ipc.O_CREAT, mode=0o666, size=1024)
     self.mm = MemMapped(self.shm.fd, self.lock)
 
   def read_input(self):
@@ -517,10 +545,10 @@ if __name__ == "__main__":
   global _sigint
   description=slurpfile('about.txt')
   parser = argparse.ArgumentParser(description=slurpfile('about.txt'), formatter_class=argparse.RawDescriptionHelpFormatter)
-  parser.add_argument('-c', '--plants', type=int, default=1,
+  parser.add_argument('-c', '--plants', type=int, default=1,  metavar='number',
                   help='Number of ball and beam plants')
-  parser.add_argument('-t', '--period', type=int, default=10,
-                    help='Update interval in milliseconds (default 10 ms)')
+  parser.add_argument('-t', '--period', type=int, default=4, metavar='number',
+                    help='Update interval in milliseconds (default %(default)s ms)')
   parser.add_argument('--ipc', type=str, default='shm',
                     help='IPC method: shm or queue. Default: shm')
   parser.add_argument('--send-state', default=None, metavar='{address}:{port}',
@@ -539,11 +567,13 @@ if __name__ == "__main__":
     udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     udpaddress = (args.send_state.split(':')[0], int(args.send_state.split(':')[1]))
   for x in range(0, args.plants):
-    _state.append({'angle': 0, 'pos': 0, 'speed': 0})
+    _state.append({'angle': 0, 'pos': 0, 'speed': 0, 'angle_noisy': 0, 'pos_noisy': 0})
   for x in range(0, args.plants):
     if args.ipc == 'shm':
+      print("Using SharedMemory IPC")
       bb = BBSimPosixShm(x)
     else:
+      print("Using Queue IPC")
       bb = BBSimPosixQueue(x)
     th = threading.Thread(target=thread_main, args=(bb, float(args.period)/1000.0))
     th.setDaemon(True)
