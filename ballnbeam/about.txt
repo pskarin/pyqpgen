@@ -1,0 +1,9 @@
+Ball and Beam simulation
+
+This software implements a real-time simulation of a Ball and Beam plant. The
+goal is to provide a virtual ball and beam which can be hooked up to software
+as a direct replacement of the physical plant. To that end, the plant
+simulation is inteded to execute in its own real-time thread and communicates
+with users through shared memory.
+
+
