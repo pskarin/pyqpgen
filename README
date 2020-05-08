@@ -14,7 +14,8 @@ Required software:
 	gcc 
 	
 Install Matlab. Version R2016a is the verified version. QPgen v0.0.2 is included
-with the package. To learn all about it go to [QPgen](http://www.control.lth.se/fileadmin/control/Research/Tools/qpgen/index.html).
+with the package. To learn all about it go to
+	http://www.control.lth.se/fileadmin/control/Research/Tools/qpgen/index.html
 Install GNU make, gcc, Python, Cython etc through your preferred package manager.
 
 Usage
