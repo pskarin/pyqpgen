@@ -210,8 +210,8 @@ class MemMapped(object):
     return self.mm.read_byte()
 
 class BBSimInterfaceEuler(BBSimInterface):
-  def __init__(self, id=0):
-    self.sim = BBSimEuler()
+  def __init__(self, id=0, beamlength=1.1):
+    self.sim = BBSimEuler(beamlength=beamlength)
 
   def reset(self):
     self.sim.reset()
