@@ -1,0 +1,1 @@
+recursive-include cotc/cvxgen/libs *.so *.py

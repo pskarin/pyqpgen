@@ -40,6 +40,11 @@ if isfield(MPC,'X')
         error('MPC.X must contain both MPC.X.Lb and MPC.X.Ub');
     end
 end
+if isfield(MPC,'Xf') 
+    if (not(isfield(MPC.X,'Lb')) || not(isfield(MPC.X,'Ub')))
+        error('MPC.Xf must contain both MPC.X.Lb and MPC.X.Ub');
+    end
+end
 if isfield(MPC,'U')
     if (not(isfield(MPC.U,'Lb')) || not(isfield(MPC.U,'Ub')))
         error('MPC.U must contain both MPC.U.Lb and MPC.U.Ub');
