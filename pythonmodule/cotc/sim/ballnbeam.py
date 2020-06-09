@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import math
-import convert
+import cotc.sim.ballnbeamconvert as convert
 import threading
 import time
 import posix_ipc as ipc
